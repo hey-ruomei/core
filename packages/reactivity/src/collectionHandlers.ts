@@ -78,6 +78,7 @@ function add(this: SetTypes, value: unknown) {
   return this
 }
 
+// 4. #reactivity 集合的 setter 函数
 function set(this: MapTypes, key: unknown, value: unknown) {
   value = toRaw(value)
   const target = toRaw(this)
@@ -331,6 +332,7 @@ const [
   shallowReadonlyInstrumentations
 ] = /* #__PURE__*/ createInstrumentations()
 
+// 3. #reactivity 集合的 getter 函数
 function createInstrumentationGetter(isReadonly: boolean, shallow: boolean) {
   const instrumentations = shallow
     ? isReadonly

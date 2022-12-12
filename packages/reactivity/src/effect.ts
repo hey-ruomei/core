@@ -210,6 +210,7 @@ export function resetTracking() {
   shouldTrack = last === undefined ? true : last
 }
 
+// 5. #reactivity targetMap -> depsMap
 export function track(target: object, type: TrackOpTypes, key: unknown) {
   if (shouldTrack && activeEffect) {
     let depsMap = targetMap.get(target)
@@ -225,6 +226,7 @@ export function track(target: object, type: TrackOpTypes, key: unknown) {
       ? { effect: activeEffect, target, type, key }
       : undefined
 
+    // 6. #reactivity track 副作用函数
     trackEffects(dep, eventInfo)
   }
 }
@@ -245,6 +247,7 @@ export function trackEffects(
   }
 
   if (shouldTrack) {
+    // 7. #reactivity 真正执行的：添加依赖动作
     dep.add(activeEffect!)
     activeEffect!.deps.push(dep)
     if (__DEV__ && activeEffect!.onTrack) {
@@ -339,6 +342,7 @@ export function trigger(
     if (__DEV__) {
       triggerEffects(createDep(effects), eventInfo)
     } else {
+      // 9. #reactivity 触发副作用函数
       triggerEffects(createDep(effects))
     }
   }
@@ -362,6 +366,7 @@ export function triggerEffects(
   }
 }
 
+// 10. #reactivity 真正执行的触发函数
 function triggerEffect(
   effect: ReactiveEffect,
   debuggerEventExtraInfo?: DebuggerEventExtraInfo
@@ -371,8 +376,10 @@ function triggerEffect(
       effect.onTrigger(extend({ effect }, debuggerEventExtraInfo))
     }
     if (effect.scheduler) {
+      // 等待任务调度
       effect.scheduler()
     } else {
+      // 立即执行
       effect.run()
     }
   }

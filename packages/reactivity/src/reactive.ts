@@ -86,6 +86,7 @@ export type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRefSimple<T>
  * count.value // -> 1
  * ```
  */
+// 1. #reactivity reactive 入口
 export function reactive<T extends object>(target: T): UnwrapNestedRefs<T>
 export function reactive(target: object) {
   // if trying to observe a readonly proxy, return the readonly version.
@@ -178,6 +179,7 @@ export function shallowReadonly<T extends object>(target: T): Readonly<T> {
   )
 }
 
+// 2. #reactivity 创建响应式对象
 function createReactiveObject(
   target: Target,
   isReadonly: boolean,
@@ -185,6 +187,7 @@ function createReactiveObject(
   collectionHandlers: ProxyHandler<any>,
   proxyMap: WeakMap<Target, any>
 ) {
+  // reactive 函数仅用于 object 类型的数据
   if (!isObject(target)) {
     if (__DEV__) {
       console.warn(`value cannot be made reactive: ${String(target)}`)
@@ -205,14 +208,19 @@ function createReactiveObject(
     return existingProxy
   }
   // only specific value types can be observed.
+  // type: [Object, Array, Map, Set, WeakMap, WeakSet]
   const targetType = getTargetType(target)
   if (targetType === TargetType.INVALID) {
     return target
   }
+  // proxy handler 函数
+  // ['Object', 'Array'] -> baseHandlers
+  // ['Map', 'Set', 'WeakMap', 'WeakSet'] -> collectionHandlers
   const proxy = new Proxy(
     target,
     targetType === TargetType.COLLECTION ? collectionHandlers : baseHandlers
   )
+  // 储存 target 已创建好的 proxy 对象
   proxyMap.set(target, proxy)
   return proxy
 }

@@ -92,6 +92,7 @@ function hasOwnProperty(key: string) {
   return obj.hasOwnProperty(key)
 }
 
+// 3. #reactivity proxy 的 getter 函数
 function createGetter(isReadonly = false, shallow = false) {
   return function get(target: Target, key: string | symbol, receiver: object) {
     if (key === ReactiveFlags.IS_REACTIVE) {
@@ -132,6 +133,7 @@ function createGetter(isReadonly = false, shallow = false) {
       return res
     }
 
+    // 读取 target[key] 时，track ‘追踪’数据
     if (!isReadonly) {
       track(target, TrackOpTypes.GET, key)
     }
@@ -159,6 +161,7 @@ function createGetter(isReadonly = false, shallow = false) {
 const set = /*#__PURE__*/ createSetter()
 const shallowSet = /*#__PURE__*/ createSetter(true)
 
+// 4. #reactivity proxy 的 setter 函数
 function createSetter(shallow = false) {
   return function set(
     target: object,
@@ -190,6 +193,7 @@ function createSetter(shallow = false) {
     const result = Reflect.set(target, key, value, receiver)
     // don't trigger if target is something up in the prototype chain of original
     if (target === toRaw(receiver)) {
+      // 8. #reactivity 为 target[key] 设置新的值时，触发trigger
       if (!hadKey) {
         trigger(target, TriggerOpTypes.ADD, key, value)
       } else if (hasChanged(value, oldValue)) {
